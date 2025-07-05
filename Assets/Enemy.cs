@@ -22,7 +22,7 @@ public class Enemy : MonoBehaviour
     [Header("Visual Feedback")]
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Color normalColor = Color.white;
-    [SerializeField] private Color damageColor = Color.red;
+    [SerializeField] private Color damageColor = Color.gray;
     [SerializeField] private float damageFlashDuration = 0.1f;
 
     private bool isDead = false;
@@ -36,6 +36,21 @@ public class Enemy : MonoBehaviour
         // Get sprite renderer if not assigned
         if (spriteRenderer == null)
             spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    // Method to update boss stats from API
+    public void SetStats(float speed, int health, int damage, int shield)
+    {
+        bossSpeed = speed;
+        // bossHealth = health;
+        bossDamage = damage;
+        bossShield = shield;
+
+        // Update current stats if this is called during gameplay
+        currentHealth = bossHealth;
+        currentShield = bossShield;
+
+        Debug.Log($"Boss stats updated - Speed: {speed}, Health: {health}, Damage: {damage}, Shield: {shield}");
     }
 
     public void TakeDamage(int damage)

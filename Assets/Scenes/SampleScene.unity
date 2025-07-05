@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 142522370}
   - component: {fileID: 142522368}
   - component: {fileID: 142522371}
+  - component: {fileID: 142522372}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -283,6 +284,55 @@ MonoBehaviour:
   enemyLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &142522372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142522365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 937902e9fef9f4b8c8d10ca73576b2b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  currentHealth: 0
+  healthSprites:
+  - {fileID: 21300000, guid: 9f004da11acd44a29a08e8bb3eca38e5, type: 3}
+  - {fileID: 21300000, guid: d85d236a9b0d741e8a77890d895a2e84, type: 3}
+  - {fileID: 21300000, guid: 74028d02adfa0481eb37d5ace07e81ca, type: 3}
+  - {fileID: 21300000, guid: 9e9258f9559394de6ad9e57d3b3e1c25, type: 3}
+  - {fileID: 21300000, guid: 8ff5eb6f229534478a5fa21742c8a01b, type: 3}
+  - {fileID: 21300000, guid: 50c929a96592f4998a33ceab3c96bf1c, type: 3}
+  - {fileID: 21300000, guid: 94def34d246654df7ab5115eec10fd7c, type: 3}
+  - {fileID: 21300000, guid: d8c9d76c812814ea9b62b840b737ec77, type: 3}
+  - {fileID: 21300000, guid: b99c79d7c61434b3e956cf9fcb8f1669, type: 3}
+  - {fileID: 21300000, guid: c032112d275cd43669ed2ededbc33858, type: 3}
+  - {fileID: 21300000, guid: 48817ecbbd6fc490c8726a66bec29daf, type: 3}
+  - {fileID: 21300000, guid: 1cc5bbeaee44742678e8410de3d73ac0, type: 3}
+  - {fileID: 21300000, guid: 42f17b1ed92df485697567f632af9d36, type: 3}
+  - {fileID: 21300000, guid: 619c5b9d206ec48d4a7a60340bc83c37, type: 3}
+  - {fileID: 21300000, guid: f3c12a135f467447fa6af128e8ba0e82, type: 3}
+  - {fileID: 21300000, guid: ca90e281a57b8415f93fc60ea47bd049, type: 3}
+  - {fileID: 21300000, guid: 23d45e993952f45d9ba695505ef57566, type: 3}
+  - {fileID: 21300000, guid: 71a131c63252a49408e0eaff772ad715, type: 3}
+  - {fileID: 21300000, guid: ef42661064090428bb1c8da356a0779d, type: 3}
+  - {fileID: 21300000, guid: cb8a95aeb6ac146b1a6ab484ea3d0ab4, type: 3}
+  - {fileID: 21300000, guid: 57af4e73a3e2245fe8b223ab82a7675c, type: 3}
+  healthRenderer: {fileID: 1390873935}
+  enableDamageFlash: 1
+  damageFlashColor: {r: 0.745283, g: 0.745283, b: 0.745283, a: 1}
+  damageFlashDuration: 0.1
+  OnDeath:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPlayerRevived:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -477,6 +527,68 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &809656382
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 809656384}
+  - component: {fileID: 809656383}
+  m_Layer: 0
+  m_Name: GameSessionManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &809656383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 809656382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09b4ef8ab6fce418a92a914cb1070b34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  apiEndpoint: https://places-burning-furnished-na.trycloudflare.com/api/game/start
+  fallbackEndpoint: 
+  playerId: test
+  levelDuration: 30
+  allowInsecureConnections: 0
+  requestTimeout: 20
+  playerMovement: {fileID: 142522368}
+  boss: {fileID: 1217202868}
+  terrainManager: {fileID: 913834727}
+  OnConfigLoaded:
+    m_PersistentCalls:
+      m_Calls: []
+  OnLevelStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnLevelEnd:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!4 &809656384
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 809656382}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &913834723
 GameObject:
   m_ObjectHideFlags: 0
@@ -488,8 +600,9 @@ GameObject:
   - component: {fileID: 913834724}
   - component: {fileID: 913834726}
   - component: {fileID: 913834725}
-  m_Layer: 5
-  m_Name: Image
+  - component: {fileID: 913834727}
+  m_Layer: 6
+  m_Name: Terrain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -534,7 +647,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 0c19fc897266d46fbbe30144f0c75c2a, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2705eadac7bf64e82b64b8d4ba3218d6, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -552,6 +665,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 913834723}
   m_CullTransparentMesh: 1
+--- !u!114 &913834727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 913834723}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e514c818a6f44b5abcfd3f7b44f0d24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  smoothTerrainSprite: {fileID: 0}
+  stickyTerrainSprite: {fileID: 0}
+  ruggedTerrainSprite: {fileID: 0}
+  backgroundRenderer: {fileID: 0}
+  smoothColor: {r: 1, g: 1, b: 1, a: 1}
+  stickyColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  ruggedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &1217202862
 GameObject:
   m_ObjectHideFlags: 0
@@ -565,6 +697,7 @@ GameObject:
   - component: {fileID: 1217202864}
   - component: {fileID: 1217202863}
   - component: {fileID: 1217202867}
+  - component: {fileID: 1217202868}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Enemy
@@ -722,6 +855,122 @@ MonoBehaviour:
   shootRange: 12
   trackingStrength: 0.3
   trackingDuration: 2
+--- !u!114 &1217202868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1217202862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42915791aa19747759528915e27dc3f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bossSpeed: 75
+  bossHealth: 180
+  bossDamage: 18
+  bossShield: 25
+  OnDeath:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnShieldChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnShieldBroken:
+    m_PersistentCalls:
+      m_Calls: []
+  spriteRenderer: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  damageFlashDuration: 0.1
+--- !u!1 &1390873934
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1390873936}
+  - component: {fileID: 1390873935}
+  m_Layer: 0
+  m_Name: PlayerHealth
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!212 &1390873935
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1390873934}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 21300000, guid: 9f004da11acd44a29a08e8bb3eca38e5, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 6.24, y: 0.36}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
+--- !u!4 &1390873936
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1390873934}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.13, y: -4.58, z: 0}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1657921032
 GameObject:
   m_ObjectHideFlags: 0
@@ -861,3 +1110,5 @@ SceneRoots:
   - {fileID: 1960854675}
   - {fileID: 1217202866}
   - {fileID: 142522367}
+  - {fileID: 809656384}
+  - {fileID: 1390873936}

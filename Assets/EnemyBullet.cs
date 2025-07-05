@@ -11,6 +11,7 @@ public class EnemyBullet : MonoBehaviour
     [SerializeField] private float lifeTime = 8f;
     [SerializeField] private float trackingStrength = 0.3f; // How much it follows player (0-1)
     [SerializeField] private float trackingDuration = 2f; // How long it tracks before going straight
+    [SerializeField] private float spinSpeed = 360f; // Degrees per second
 
     private Transform target;
     private Vector2 fixedDirection;
@@ -78,9 +79,8 @@ public class EnemyBullet : MonoBehaviour
 
         rb.velocity = direction * bulletSpeed;
 
-        // Rotate sprite to face movement direction
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        // Add spinning motion
+        transform.Rotate(0, 0, spinSpeed * Time.fixedDeltaTime);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -91,14 +91,14 @@ public class EnemyBullet : MonoBehaviour
             PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
             if (playerHealth != null)
             {
+
                 playerHealth.TakeDamage(bulletDamage);
             }
             Destroy(gameObject);
         }
 
         // Hit wall/boundary
-        // if (other.CompareTag("Wall"))
-        // {
+        // if (other.CompareTag("Wall")) {
         //     Destroy(gameObject);
         // }
     }
