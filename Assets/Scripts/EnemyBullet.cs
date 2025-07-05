@@ -17,11 +17,19 @@ public class EnemyBullet : MonoBehaviour
     private Vector2 fixedDirection;
     private bool isTracking = true;
     private float trackingTimer;
+    private PerformanceTracker performanceTracker;
 
     public void SetTarget(Transform _target)
     {
         target = _target;
         trackingTimer = trackingDuration;
+
+        // Find performance tracker and log bullet fired
+        if (performanceTracker == null)
+            performanceTracker = FindObjectOfType<PerformanceTracker>();
+
+        if (performanceTracker != null)
+            performanceTracker.OnBulletFired();
     }
 
     public void SetDamage(int damage)
@@ -91,14 +99,19 @@ public class EnemyBullet : MonoBehaviour
             PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
             if (playerHealth != null)
             {
-
                 playerHealth.TakeDamage(bulletDamage);
             }
+
+            // Log bullet hit for performance tracking
+            if (performanceTracker != null)
+                performanceTracker.OnBulletHitPlayer();
+
             Destroy(gameObject);
         }
 
         // Hit wall/boundary
-        // if (other.CompareTag("Wall")) {
+        // if (other.CompareTag("Wall"))
+        // {
         //     Destroy(gameObject);
         // }
     }
