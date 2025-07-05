@@ -52,7 +52,9 @@ public class GameSessionManager : MonoBehaviour
     [SerializeField] private string apiEndpoint = "https://places-burning-furnished-na.trycloudflare.com/api/game/start";
     [SerializeField] private string fallbackEndpoint = ""; // Backup URL if main fails
     [SerializeField] private string playerId = "test"; // Player ID to send in request
-    [SerializeField] private float levelDuration = 30f; // 30 seconds per level
+    [SerializeField] private float totalLevelDuration = 60f; // Total time shown to player (1 minute)
+    [SerializeField] private float judgmentPeriod = 30f; // When player performance is judged
+    [SerializeField] private float bufferPeriod = 30f; // Buffer for API response and transition
     [SerializeField] private bool allowInsecureConnections = false; // Now using HTTPS
     [SerializeField] private float requestTimeout = 10f; // Timeout in seconds
 
@@ -64,11 +66,17 @@ public class GameSessionManager : MonoBehaviour
     [Header("Events")]
     public UnityEvent<GameConfig> OnConfigLoaded;
     public UnityEvent OnLevelStart;
+    public UnityEvent OnJudgmentPeriodEnd; // When performance judging ends
     public UnityEvent OnLevelEnd;
+    public UnityEvent OnBufferPeriodStart; // When buffer period begins
 
     private string currentSessionId;
     private GameConfig currentConfig;
+    private GameConfig nextConfig; // Store next level config during buffer
     private bool isGameActive = false;
+    private bool isInJudgmentPeriod = true;
+    private bool isInBufferPeriod = false;
+    private bool nextConfigReady = false;
     private float levelTimer;
 
     void Start()
@@ -81,6 +89,14 @@ public class GameSessionManager : MonoBehaviour
         if (isGameActive)
         {
             levelTimer -= Time.deltaTime;
+
+            // Check if judgment period just ended
+            if (isInJudgmentPeriod && levelTimer <= bufferPeriod)
+            {
+                EndJudgmentPeriod();
+            }
+
+            // Check if entire level ended
             if (levelTimer <= 0)
             {
                 EndLevel();
@@ -246,34 +262,155 @@ public class GameSessionManager : MonoBehaviour
     void BeginLevel()
     {
         isGameActive = true;
-        levelTimer = levelDuration;
+        isInJudgmentPeriod = true;
+        isInBufferPeriod = false;
+        nextConfigReady = false;
+        levelTimer = totalLevelDuration; // Full 60 seconds
         OnLevelStart?.Invoke();
 
-        Debug.Log($"Level started! Duration: {levelDuration} seconds");
+        Debug.Log($"Level started! Total duration: {totalLevelDuration}s (Judgment: {judgmentPeriod}s, Buffer: {bufferPeriod}s)");
+    }
+
+    void EndJudgmentPeriod()
+    {
+        isInJudgmentPeriod = false;
+        isInBufferPeriod = true;
+        OnJudgmentPeriodEnd?.Invoke();
+        OnBufferPeriodStart?.Invoke();
+
+        Debug.Log("Judgment period ended! Starting buffer period and fetching next config...");
+
+        // Start fetching next level config during buffer period
+        StartCoroutine(FetchNextLevelConfig());
     }
 
     void EndLevel()
     {
         isGameActive = false;
+        isInJudgmentPeriod = false;
+        isInBufferPeriod = false;
         OnLevelEnd?.Invoke();
 
-        Debug.Log("Level ended! Starting new level...");
+        Debug.Log("Level ended! Starting next level...");
 
-        // Wait a moment then start next level
-        StartCoroutine(DelayedLevelStart());
+        // Apply next config if ready, otherwise use current
+        if (nextConfigReady && nextConfig != null)
+        {
+            currentConfig = nextConfig;
+            nextConfig = null;
+            nextConfigReady = false;
+
+            Debug.Log("Applying pre-loaded next level configuration");
+            ApplyConfiguration();
+            BeginLevel();
+        }
+        else
+        {
+            Debug.Log("Next config not ready, starting new fetch...");
+            StartNewLevel();
+        }
     }
 
-    IEnumerator DelayedLevelStart()
+    IEnumerator FetchNextLevelConfig()
     {
-        yield return new WaitForSeconds(2f); // Brief pause between levels
-        StartNewLevel();
+        Debug.Log("Fetching next level configuration during buffer period...");
+
+        // Try main endpoint first
+        yield return StartCoroutine(TryFetchNextConfigFromEndpoint(apiEndpoint));
+
+        // If main failed and we have a fallback, try it
+        if (nextConfig == null && !string.IsNullOrEmpty(fallbackEndpoint))
+        {
+            Debug.Log("Main endpoint failed, trying fallback for next config...");
+            yield return StartCoroutine(TryFetchNextConfigFromEndpoint(fallbackEndpoint));
+        }
+
+        // Mark as ready (even if failed - will use default)
+        if (nextConfig == null)
+        {
+            Debug.LogWarning("Failed to fetch next config, will use default");
+            nextConfig = CreateDefaultConfig();
+        }
+
+        nextConfigReady = true;
+        Debug.Log($"Next level config ready! Remaining buffer time: {levelTimer:F1}s");
+    }
+
+    IEnumerator TryFetchNextConfigFromEndpoint(string endpoint)
+    {
+        // Create the request body using proper serializable class
+        StartGameRequest requestData = new StartGameRequest(this.playerId);
+        string requestBody = JsonUtility.ToJson(requestData);
+
+        Debug.Log($"Request body before encoding: {requestBody}");
+
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(requestBody);
+
+        using (UnityWebRequest request = new UnityWebRequest(endpoint, "POST"))
+        {
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            // Set timeout
+            request.timeout = (int)requestTimeout;
+
+            // Allow insecure connections if needed
+            if (allowInsecureConnections)
+            {
+                request.certificateHandler = new AcceptAllCertificatesSignedWithASpecificKeyPublicKey();
+            }
+
+            // Set headers
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("User-Agent", "Unity-Game-Client");
+
+            Debug.Log($"Sending POST request for next config to: {endpoint}");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                try
+                {
+                    string jsonResponse = request.downloadHandler.text;
+                    Debug.Log($"Next config API Response: {jsonResponse}");
+
+                    SessionResponse response = JsonUtility.FromJson<SessionResponse>(jsonResponse);
+
+                    if (response.success)
+                    {
+                        nextConfig = response.config;
+                        Debug.Log($"Next level config loaded successfully!");
+                    }
+                    else
+                    {
+                        Debug.LogError($"Next config API returned error: {response.message}");
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"Failed to parse next config JSON response: {e.Message}");
+                }
+            }
+            else
+            {
+                Debug.LogError($"Next config API request failed: {request.error}");
+            }
+        }
     }
 
     void UseDefaultConfig()
     {
         Debug.Log("Using default configuration");
 
-        currentConfig = new GameConfig
+        currentConfig = CreateDefaultConfig();
+        ApplyConfiguration();
+        BeginLevel();
+    }
+
+    GameConfig CreateDefaultConfig()
+    {
+        return new GameConfig
         {
             terrain = new TerrainConfig
             {
@@ -288,16 +425,20 @@ public class GameSessionManager : MonoBehaviour
                 shield = 25
             }
         };
-
-        ApplyConfiguration();
-        BeginLevel();
     }
 
     // Public getters
     public string GetCurrentSessionId() => currentSessionId;
     public GameConfig GetCurrentConfig() => currentConfig;
     public float GetRemainingTime() => levelTimer;
+    public float GetJudgmentTimeRemaining() => isInJudgmentPeriod ? levelTimer - bufferPeriod : 0f;
     public bool IsGameActive() => isGameActive;
+    public bool IsInJudgmentPeriod() => isInJudgmentPeriod;
+    public bool IsInBufferPeriod() => isInBufferPeriod;
+    public bool IsNextConfigReady() => nextConfigReady;
+    public float GetTotalDuration() => totalLevelDuration;
+    public float GetJudgmentDuration() => judgmentPeriod;
+    public float GetBufferDuration() => bufferPeriod;
 }
 
 // Certificate handler to allow insecure connections (development only)
