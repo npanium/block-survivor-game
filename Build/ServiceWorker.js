@@ -1,9 +1,9 @@
 const cacheName = "DefaultCompany-Block Survivor Game-1.0";
 const contentToCache = [
     "Build/Build.loader.js",
-    "Build/Build.framework.js.br",
-    "Build/Build.data.br",
-    "Build/Build.wasm.br",
+    "Build/Build.framework.js.unityweb",
+    "Build/Build.data.unityweb",
+    "Build/Build.wasm.unityweb",
     "TemplateData/style.css"
 
 ];
