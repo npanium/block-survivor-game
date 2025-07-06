@@ -8,6 +8,8 @@ public class PerformanceData
     public int apm;
     public float dodgeRatio;
     public int round;
+    public bool gameCompleted; // New field to indicate if game was completed
+    public bool playerWon;     // New field to indicate if player won
 }
 
 public class PerformanceTracker : MonoBehaviour
@@ -84,10 +86,28 @@ public class PerformanceTracker : MonoBehaviour
         Debug.Log($"Round {currentRound} Complete - APM: {finalAPM}, Dodge Ratio: {finalDodgeRatio:F2}, Duration: {trackingDuration:F1}s");
 
         // Send data to API
-        StartCoroutine(SendPerformanceData(finalAPM, finalDodgeRatio, currentRound));
+        StartCoroutine(SendPerformanceData(finalAPM, finalDodgeRatio, currentRound, false, false));
 
         // Increment round for next level
         currentRound++;
+    }
+
+    // New method for immediate sending when game ends
+    public void SendImmediatePerformanceData(bool playerWon)
+    {
+        if (!isTracking) return;
+
+        isTracking = false;
+        float trackingDuration = Time.time - trackingStartTime;
+
+        // Calculate final metrics
+        int finalAPM = Mathf.RoundToInt((keyboardInputs / trackingDuration) * 60f);
+        float finalDodgeRatio = totalBulletsFired > 0 ? 1f - ((float)bulletsHitPlayer / totalBulletsFired) : 1f;
+
+        Debug.Log($"Game ended - Round {currentRound} - APM: {finalAPM}, Dodge Ratio: {finalDodgeRatio:F2}, Player Won: {playerWon}");
+
+        // Send final data with game completion status
+        StartCoroutine(SendPerformanceData(finalAPM, finalDodgeRatio, currentRound, true, playerWon));
     }
 
     void TrackKeyboardInputs()
@@ -126,7 +146,7 @@ public class PerformanceTracker : MonoBehaviour
         }
     }
 
-    IEnumerator SendPerformanceData(int apm, float dodgeRatio, int round)
+    IEnumerator SendPerformanceData(int apm, float dodgeRatio, int round, bool gameCompleted = false, bool playerWon = false)
     {
         string sessionId = sessionManager.GetCurrentSessionId();
 
@@ -142,7 +162,9 @@ public class PerformanceTracker : MonoBehaviour
         {
             apm = apm,
             dodgeRatio = dodgeRatio,
-            round = round
+            round = round,
+            gameCompleted = gameCompleted,
+            playerWon = playerWon
         };
 
         string jsonData = JsonUtility.ToJson(data);

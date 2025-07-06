@@ -7,7 +7,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float bossSpeed = 75f;
     [SerializeField] private int bossHealth = 180;
     [SerializeField] private int bossDamage = 18;
-    [SerializeField] private int bossShield = 25;
+    [SerializeField] private int bossShield = 0;
 
     [Header("Current Stats")]
     private int currentHealth;
@@ -44,7 +44,7 @@ public class Enemy : MonoBehaviour
         bossSpeed = speed;
         // bossHealth = health;
         bossDamage = damage;
-        bossShield = shield;
+        // bossShield = shield;
 
         // Update current stats if this is called during gameplay
         currentHealth = bossHealth;
